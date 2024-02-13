@@ -11,8 +11,10 @@ export const Header = () => {
         <ul className="flex gap-4">
           <Link to="/"><li>Домашняя</li></Link>
           <Link to="/about"><li>О приложении</li></Link>
-          {currentUser ? <img src={currentUser.profilePicture} alt="profilePicture" className="size-7 rounded-full object-cover" /> : <Link to="sign-in"><li>Войти</li></Link>
-          }
+          <Link to="/profile">
+            {currentUser ? <img src={currentUser.profilePicture} alt="profilePicture" className="size-7 rounded-full object-cover" /> : <li>Войти</li>
+            }
+          </Link>
         </ul>
       </div>
     </div>
