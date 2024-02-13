@@ -17,7 +17,14 @@ export const signup = async (req, res, next) => {
     const hashedPassword = await bcryptjs.hash(password, 10)
     const newUser = await User.create({ username, email, password: hashedPassword })
 
-    return res.status(201).json({ message: "Пользователь успешно создан" })
+    const { password: hashPassword, ...rest } = newUser._doc
+
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET)
+    res.cookie("accessToken", token, {
+      expires: new Date(Date.now() + 900000),
+      httpOnly: true
+    })
+    res.status(201).json(rest)
   } catch (error) {
     next(error)
   }
@@ -51,7 +58,7 @@ export const google = async (req, res, next) => {
     const { name, email, photo } = req.body
 
     const user = await User.findOne({ email })
-    
+
     if (user) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
       const { password: hashedPassword, ...rest } = user._doc
@@ -76,7 +83,7 @@ export const google = async (req, res, next) => {
         expires: new Date(Date.now() + 900000),
         httpOnly: true
       })
-      res.status(200).json(rest)
+      res.status(201).json(rest)
     }
   } catch (error) {
     next(error)
