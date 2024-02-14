@@ -33,7 +33,7 @@ export const SignUp = () => {
         return
       }
       dispatch(singInSuccess(data))
-      navigate("/sign-in")
+      navigate("/")
     } catch (error) {
       dispatch(signInFailure(error))
     }

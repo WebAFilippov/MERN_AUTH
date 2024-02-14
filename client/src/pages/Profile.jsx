@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { app } from "../firebase"
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage"
-import { updateInStart, updateInSuccess, updateInFailure, signOut } from "../redux/user/userSlice"
+import { updateInStart, updateInSuccess, updateInFailure, signOut, deleteInSuccess, deleteInFailure, deleteInStart } from "../redux/user/userSlice"
 
 export const Profile = () => {
   const dispatch = useDispatch()
@@ -75,7 +75,20 @@ export const Profile = () => {
   }
 
   const handleDeleteAccount = async () => {
-    
+    try {
+      dispatch(deleteInStart())
+      const response = await fetch(`/api/user/delete/${currentUser._id}`,
+        {
+          method: "DELETE"
+        })
+      const data = await response.json()
+      if (data.success == false) {
+        return dispatch(deleteInFailure(data))
+      }
+      dispatch(deleteInSuccess())
+    } catch (error) {
+      dispatch(deleteInFailure(error))
+    }
   }
 
   const handleSignOut = async () => {
@@ -109,7 +122,7 @@ export const Profile = () => {
         <span className="text-red-700 cursor-pointer" onClick={handleSignOut}>Выйти</span>
       </div>
       <p className='text-green-700 mt-5'>
-        {updateSuccess && 'User is updated successfully!'}
+        {updateSuccess && 'Профиль успешно обновлен!'}
       </p>
     </div>
   )

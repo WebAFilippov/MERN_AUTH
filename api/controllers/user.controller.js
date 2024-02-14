@@ -3,7 +3,7 @@ import bcryptjs from "bcryptjs"
 import { errorHandler } from "../utils/error.js"
 import { User } from './../models/user.model.js';
 
-export const update = async (req, res, next) => {
+export const updateUser = async (req, res, next) => {
   if (req.params.id !== req.user.id) return next(errorHandler(401, "Вы можете обновить только свою учетную запись"))
 
   try {
@@ -23,13 +23,25 @@ export const update = async (req, res, next) => {
       },
       {
         returnDocument: "after",
-        runValidators: true,
       }
     )
 
     const { password: enteredPassword, ...rest } = user._doc
 
     res.status(200).json(rest)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteUser = async (req, res, next) => {
+  if (req.params.id !== req.user.id) {
+    return next(errorHandler(401, "Вы можете обновить только свою учетную запись"))
+  }
+
+  try {
+    await User.findByIdAndDelete(req.params.id)
+    res.status(200).json("Аккаунт успешно удален")
   } catch (error) {
     next(error)
   }
