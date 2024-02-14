@@ -1,11 +1,10 @@
 import express from "express"
 
+import { verifyUser } from "../utils/verifyUser.js"
+import { update } from "../controllers/user.controller.js"
+
 const router = express.Router()
 
-router.get("/", (req, res) => {
-  res.json({
-    message: "API its working!"
-  })
-})
+router.post('/update/:id', verifyUser, update)
 
 export default router

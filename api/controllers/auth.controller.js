@@ -80,7 +80,7 @@ export const google = async (req, res, next) => {
       const { password: hashedPassword2, ...rest } = newUser._doc
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET)
       res.cookie("accessToken", token, {
-        expires: new Date(Date.now() + 900000),
+        expires: new Date(Date.now() + 900000), //15minutes
         httpOnly: true
       })
       res.status(201).json(rest)
