@@ -3,17 +3,25 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { app } from "../firebase"
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage"
-import { updateInStart, updateInSuccess, updateInFailure, signOut, deleteInSuccess, deleteInFailure, deleteInStart } from "../redux/user/userSlice"
+import {
+  updateInStart,
+  updateInSuccess,
+  updateInFailure,
+  signOut,
+  deleteInSuccess,
+  deleteInFailure,
+  deleteInStart,
+} from "../redux/user/userSlice"
 
 export const Profile = () => {
   const dispatch = useDispatch()
   const fileRef = useRef(null)
-  const { currentUser } = useSelector(state => state.user)
+  const { currentUser } = useSelector((state) => state.user)
   const [image, setImage] = useState(undefined)
   const [imageError, setImageError] = useState(false)
   const [percent, setPercent] = useState(0)
   const [formData, setFormData] = useState({})
-  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false)
 
   useEffect(() => {
     if (image) {
@@ -25,9 +33,11 @@ export const Profile = () => {
   const handleFileUpload = async (image) => {
     setImageError(false)
     const storage = getStorage(app)
+    const storageRef = ref(storage)
+    const imagesRef = ref(storageRef, "images")
     const fileName = new Date().getDate() + image.name
-    const storageRef = ref(storage, fileName)
-    const uploadFile = uploadBytesResumable(storageRef, image)
+    const fullRef = ref(imagesRef, fileName)
+    const uploadFile = uploadBytesResumable(fullRef, image)
     uploadFile.on(
       "state_changed",
       (snapshot) => {
@@ -42,7 +52,7 @@ export const Profile = () => {
         getDownloadURL(uploadFile.snapshot.ref).then((downloadURL) => {
           setFormData({ ...formData, profilePicture: downloadURL })
         })
-      }
+      },
     )
   }
 
@@ -58,9 +68,9 @@ export const Profile = () => {
       const response = await fetch(`/api/user/update/${currentUser._id}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       })
       const data = await response.json()
       if (data.success === false) {
@@ -77,10 +87,9 @@ export const Profile = () => {
   const handleDeleteAccount = async () => {
     try {
       dispatch(deleteInStart())
-      const response = await fetch(`/api/user/delete/${currentUser._id}`,
-        {
-          method: "DELETE"
-        })
+      const response = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      })
       const data = await response.json()
       if (data.success == false) {
         return dispatch(deleteInFailure(data))
@@ -93,7 +102,7 @@ export const Profile = () => {
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/auth/signout")
+      await fetch("/api/auth/signout", { method: "POST" })
       dispatch(signOut())
     } catch (error) {
       console.log(error)
@@ -106,24 +115,61 @@ export const Profile = () => {
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <input ref={fileRef} type="file" hidden accept="image/.*" onChange={(e) => setImage(e.target.files[0])} />
-        <img src={formData.profilePicture || currentUser.profilePicture} alt="profilePicture" className="size-36 self-center rounded-full object-cover cursor-pointer" onClick={() => fileRef.current.click()} />
+        <img
+          src={formData.profilePicture || currentUser.profilePicture}
+          alt="profilePicture"
+          className="size-36 self-center rounded-full object-cover cursor-pointer"
+          onClick={() => fileRef.current.click()}
+        />
         <p className="text-sm self-center">
-          {imageError ? <span className="text-red-700">Ошибка загрузки файла (изображение до 2мб)</span> : percent > 0 && percent < 100 ? <span className="text-slate-700">{`Загрузка ${percent} %`}</span> : percent === 100 ? <span className="text-green-700">Изображение успешно загружено</span> : ""}
+          {imageError ? (
+            <span className="text-red-700">Ошибка загрузки файла (изображение до 2мб)</span>
+          ) : percent > 0 && percent < 100 ? (
+            <span className="text-slate-700">{`Загрузка ${percent} %`}</span>
+          ) : percent === 100 ? (
+            <span className="text-green-700">Изображение успешно загружено</span>
+          ) : (
+            ""
+          )}
         </p>
 
-        <input defaultValue={currentUser.username} className="bg-slate-100 p-3 rounded-lg" type="text" placeholder="Никнейм" id="username" onChange={handleChange} />
-        <input defaultValue={currentUser.email} className="bg-slate-100 p-3 rounded-lg" type="email" placeholder="Е-майл" id="email" onChange={handleChange} />
-        <input className="bg-slate-100 p-3 rounded-lg" type="password" placeholder="Пароль" id="password" onChange={handleChange} />
-        <button type="submit" className="bg-slate-700 p-3 rounded-lg text-white hover:opacity-95 disabled:opacity-80">Обновить</button>
+        <input
+          defaultValue={currentUser.username}
+          className="bg-slate-100 p-3 rounded-lg"
+          type="text"
+          placeholder="Никнейм"
+          id="username"
+          onChange={handleChange}
+        />
+        <input
+          defaultValue={currentUser.email}
+          className="bg-slate-100 p-3 rounded-lg"
+          type="email"
+          placeholder="Е-майл"
+          id="email"
+          onChange={handleChange}
+        />
+        <input
+          className="bg-slate-100 p-3 rounded-lg"
+          type="password"
+          placeholder="Пароль"
+          id="password"
+          onChange={handleChange}
+        />
+        <button type="submit" className="bg-slate-700 p-3 rounded-lg text-white hover:opacity-95 disabled:opacity-80">
+          Обновить
+        </button>
       </form>
 
       <div className="flex justify-between my-3 px-3">
-        <span className="text-red-700 cursor-pointer" onClick={handleDeleteAccount}>Удалить аккаунт</span>
-        <span className="text-red-700 cursor-pointer" onClick={handleSignOut}>Выйти</span>
+        <span className="text-red-700 cursor-pointer" onClick={handleDeleteAccount}>
+          Удалить аккаунт
+        </span>
+        <span className="text-red-700 cursor-pointer" onClick={handleSignOut}>
+          Выйти
+        </span>
       </div>
-      <p className='text-green-700 mt-5'>
-        {updateSuccess && 'Профиль успешно обновлен!'}
-      </p>
+      <p className="text-green-700 mt-5">{updateSuccess && "Профиль успешно обновлен!"}</p>
     </div>
   )
 }
