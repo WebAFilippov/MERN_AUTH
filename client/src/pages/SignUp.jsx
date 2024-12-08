@@ -71,6 +71,8 @@ export const SignUp = () => {
         >
           {loading ? "Загрузка..." : "Зарегистрироваться"}
         </button>
+
+        {/* Войти с помощью Google - Button */}
         <OAuth />
       </form>
       <div className="flex gap-2 mt-5">
