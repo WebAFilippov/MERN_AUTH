@@ -1,5 +1,4 @@
 import express from "express"
-import expressWs from "express-ws"
 import mongoose from "mongoose"
 import cookieParser from "cookie-parser"
 import dotenv from "dotenv"
